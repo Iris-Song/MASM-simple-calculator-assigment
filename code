@@ -1,7 +1,7 @@
 DATA SEGMENT
-WCMSTR    DB 0AH,0DH,"Please input a simple expression(only contain +,-,*,\)",'$'
-OUTSTR    DB 0AH,0DH,"The result is",'$'
-ERRSTR    DB 0AH,0DH,"error",'$'
+WCMSTR    DB 0AH,0DH,"Please input a simple expression(only contain +,-,*,\)",0AH,0DH,'$'
+OUTSTR    DB 0AH,0DH,"The result is",0AH,0DH,'$'
+ERRSTR    DB 0AH,0DH,"error",0AH,0DH,'$'
 DIVISORS  DW 10000, 1000, 100, 10, 1
 RESULT1   DB 0,0,0,0,0,"$"               ;存放整数部分五位数ASCII码 
 DATA ENDS
