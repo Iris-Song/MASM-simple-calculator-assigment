@@ -7,8 +7,8 @@ RESULT1   DB 0,0,0,0,0,"$"               ;存放整数部分五位数ASCII码
 DATA ENDS
 
 CODE SEGMENT
+ASSUME CS:CODE, DS:DATA
 MAIN PROC
-    ASSUME CS:CODE, DS:DATA
     MOV  AX, DATA
     MOV  DS, AX  
     LEA  DX,WCMSTR
@@ -45,7 +45,8 @@ ERROR:
     MOV  AX,9
     INT  21H
     JMP  EXIT
-    
+RET
+MAIN ENDP
 OUTPUT PROC
     MOV  AX,DX
     MOV  SI,OFFSET DIVISORS
@@ -75,6 +76,6 @@ PRINT:                                   ;输出整数部分
     MOV  AH,2
     INT  21H                             ;输出小数点
     RET
-END OUTPUT
+OUTPUT ENDP
 CODE ENDS
 END MAIN
