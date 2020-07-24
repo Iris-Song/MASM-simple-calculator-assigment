@@ -28,7 +28,7 @@ MAIN PROC
     JG   ERROR
     CMP  AL,'9'
     JL   ERROR
-    
+    SUB  30H
 EXIT:
     MOV  AX, 4C00H
     INT  21H
