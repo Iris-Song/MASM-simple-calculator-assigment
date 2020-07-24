@@ -1,9 +1,16 @@
 DATA SEGMENT
+WCMSTR DB 0AH,0DH,"Please input a simple expression(only contain +,-,*,\)",'$'
+OUTSTR DB 0AH,0DH,"The result is",'$'
 DATA ENDS
 
 CODE SEGMENT
     ASSUME CS:CODE, DS:DATA
-
+    LEA DX,WCMSTR
+    MOV AX,9
+    INT 21H        ;输出提示信息
+    MOV	AH, 1
+    INT	21H        ;输入一个字符
+    CMP AL,'0'     ;判断输入是否合适
 ENDMAIN:
     MOV AX, 4C00H
     INT 21H
