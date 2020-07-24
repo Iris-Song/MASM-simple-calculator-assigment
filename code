@@ -34,6 +34,7 @@ MAIN PROC
     MUL  CL
     ADD  DX,AX
     JMP  AGAIN
+    CALL OUTPUT    
 EXIT:
     MOV  AX, 4C00H
     INT  21H
@@ -42,5 +43,8 @@ ERROR:
     MOV  AX,9
     INT  21H
     JMP  EXIT
+OUTPUT PROC
+    
+END OUTPUT
 CODE ENDS
 END MAIN
