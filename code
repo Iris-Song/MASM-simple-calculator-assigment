@@ -53,24 +53,27 @@ OUTPUT PROC
     MOV  CX,5  
 ONE:
     MOV  DX,0           
-    DIV  WORD PTR [SI]                 ;除法指令的被除数是隐含操作数，此处为dx:ax，商ax,余数dx
-    ADD  AL,30H                       ;得到相应数字的ASCII码
-    MOV  BYTE PTR [DI],AL      
+    DIV  WORD PTR [SI]                   ;除法指令的被除数是隐含操作数，此处为dx:ax，商ax,余数dx
+    ADD  AL,30H                          ;得到相应数字的ASCII码
+    MOV  BYTE PTR [DI],AL                ;存入result1中
     INC  DI                               
     ADD  SI,2                          
     MOV  AX,DX                       
     LOOP ONE
-    MOV  CX,4   
+    MOV  CX,4       
     MOV  DI, OFFSET RESULT1
 TWO:
-    CMP  BYTE PTR [DI],'0'        ;不输出前面的0字符   
-    JNE  PRINT
+    CMP  BYTE PTR [DI],'0'               ;不输出前面的0字符   
+    JNE  PRINT                           
     INC  DI                          
-    LOOP TWO
-PRINT:
+    LOOP TWO 
+PRINT:                                   ;输出整数部分
     MOV  DX,DI                      
     MOV  AH,9
-    INT  21H                 
+    INT  21H
+    MOV  DL,'.'
+    MOV  AH,2
+    INT  21H                             ;输出小数点
     RET
 END OUTPUT
 CODE ENDS
