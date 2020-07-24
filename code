@@ -1,8 +1,9 @@
 DATA SEGMENT
-WCMSTR DB 0AH,0DH,"Please input a simple expression(only contain +,-,*,\)",'$'
-OUTSTR DB 0AH,0DH,"The result is",'$'
-ERRSTR DB 0AH,0DH,"error",'$'
-DECNUM   DB   5 DUP(?)  
+WCMSTR    DB 0AH,0DH,"Please input a simple expression(only contain +,-,*,\)",'$'
+OUTSTR    DB 0AH,0DH,"The result is",'$'
+ERRSTR    DB 0AH,0DH,"error",'$'
+DIVISORS  DW 10000, 1000, 100, 10, 1
+RESULT1   DB 0,0,0,0,0,"$"               ;存放整数部分五位数ASCII码 
 DATA ENDS
 
 CODE SEGMENT
@@ -12,12 +13,12 @@ MAIN PROC
     MOV  DS, AX  
     LEA  DX,WCMSTR
     MOV  AX,9
-    INT  21H        ;输出提示信息
+    INT  21H                             ;输出提示信息
     MOV  AH,1
  AGAIN:
-    INT  21H        ;输入一个字符
+    INT  21H                             ;输入一个字符
     CMP  AL,0DH
-    JE   EXIT       ;如果是回车，就退出该程序
+    JE   EXIT                            ;如果是回车，就退出该程序
     CMP  AL,'+'
     JE   ADDITION
     CMP  AL,'-'
@@ -46,7 +47,30 @@ ERROR:
     JMP  EXIT
     
 OUTPUT PROC
- 
+    MOV  AX,DX
+    MOV  SI,OFFSET DIVISORS
+    MOV  DI,OFFSET RESULT1                    
+    MOV  CX,5  
+ONE:
+    MOV  DX,0           
+    DIV  WORD PTR [SI]                 ;除法指令的被除数是隐含操作数，此处为dx:ax，商ax,余数dx
+    ADD  AL,30H                       ;得到相应数字的ASCII码
+    MOV  BYTE PTR [DI],AL      
+    INC  DI                               
+    ADD  SI,2                          
+    MOV  AX,DX                       
+    LOOP ONE
+    MOV  CX,4   
+    MOV  DI, OFFSET RESULT1
+TWO:
+    CMP  BYTE PTR [DI],'0'        ;不输出前面的0字符   
+    JNE  PRINT
+    INC  DI                          
+    LOOP TWO
+PRINT:
+    MOV  DX,DI                      
+    MOV  AH,9
+    INT  21H                 
     RET
 END OUTPUT
 CODE ENDS
