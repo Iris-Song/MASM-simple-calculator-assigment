@@ -14,8 +14,8 @@ MAIN PROC
     LEA  DX,WCMSTR
     MOV  AX,9
     INT  21H                             ;输出提示信息
+AGAIN:
     MOV  AH,1
- AGAIN:
     INT  21H                             ;输入一个字符
     CMP  AL,0DH
     JE   EXIT                            ;如果是回车，就退出该程序
