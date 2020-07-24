@@ -29,6 +29,9 @@ MAIN PROC
     CMP  AL,'9'
     JL   ERROR
     SUB  30H
+    MOV  CL,10
+    MUL  CL
+    ADD  DX,AX
 EXIT:
     MOV  AX, 4C00H
     INT  21H
