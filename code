@@ -1,5 +1,5 @@
 DATA SEGMENT
-WCMSTR    DB 0AH,0DH,"Please input a simple expression(only contain +,-,*,\)",0AH,0DH,'$'
+WCMSTR    DB "Please input a simple expression(only contain +,-,*,\)",0AH,0DH,'$'
 OUTSTR    DB 0AH,0DH,"The result is",0AH,0DH,'$'
 ERRSTR    DB 0AH,0DH,"error",0AH,0DH,'$'
 DIVISORS  DW 10000, 1000, 100, 10, 1
