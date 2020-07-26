@@ -15,11 +15,11 @@ MAIN PROC
     MOV  AH,9
     INT  21H                             ;输出提示信息
     MOV  DX,0
-AGAIN:
+AGAIN:                                   ;第一个操作数，存在DX中
     MOV  AH,1
     INT  21H                             ;输入一个字符
     CMP  AL,0DH
-    JE   EXIT                            ;如果是回车，就退出该程序
+    JE   OP                              ;如果是回车，就输出结果
     CMP  AL,'+'
     JE   ADDITION
     CMP  AL,'-'
@@ -28,15 +28,19 @@ AGAIN:
     JE   MULTIPLY  
     CMP  AL,'/'
     JE   DIVISION
+    MOV  AH,0
     CMP  AL,'0'
     JL   ERROR
     CMP  AL,'9'
     JG   ERROR
     SUB  AL,30H
+    XCHG AX,DX
     MOV  CL,10
     MUL  CL
-    ADD  DX,AX
+    ADD  AX,DX
+    XCHG AX,DX                           ;计算整个数字的大小并存在DX中
     JMP  AGAIN
+OP:
     CALL OUTPUT    
 EXIT:
     MOV  AX, 4C00H
