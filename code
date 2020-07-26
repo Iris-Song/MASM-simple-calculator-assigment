@@ -43,7 +43,7 @@ EXIT:
     INT  21H
 ERROR:
     LEA  DX,ERRSTR
-    MOV  AX,9
+    MOV  AH,9
     INT  21H
     JMP  EXIT
 RET
