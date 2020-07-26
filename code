@@ -12,8 +12,9 @@ MAIN PROC
     MOV  AX, DATA
     MOV  DS, AX  
     LEA  DX,WCMSTR
-    MOV  AX,9
+    MOV  AH,9
     INT  21H                             ;输出提示信息
+    MOV  DX,0
 AGAIN:
     MOV  AH,1
     INT  21H                             ;输入一个字符
