@@ -29,9 +29,9 @@ AGAIN:
     CMP  AL,'/'
     JE   DIVISION
     CMP  AL,'0'
-    JG   ERROR
-    CMP  AL,'9'
     JL   ERROR
+    CMP  AL,'9'
+    JG   ERROR
     SUB  AL,30H
     MOV  CL,10
     MUL  CL
