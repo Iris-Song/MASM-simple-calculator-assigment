@@ -32,7 +32,7 @@ AGAIN:
     JG   ERROR
     CMP  AL,'9'
     JL   ERROR
-    SUB  30H
+    SUB  AL,30H
     MOV  CL,10
     MUL  CL
     ADD  DX,AX
