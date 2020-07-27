@@ -1,6 +1,6 @@
 DATA SEGMENT
 WCMSTR    DB "Please input a simple expression(only contain +,-,*,\)",0AH,0DH,'$'
-OUTSTR    DB 0AH,0DH,"S=",0AH,0DH,'$'
+OUTSTR    DB 0AH,0DH,"S=",'$'
 ERRSTR    DB 0AH,0DH,"error",0AH,0DH,'$'
 RESULT    DW ?                          
 EXP       DB  'M'
@@ -29,6 +29,10 @@ AGAIN:
     INT  21H                             ;输入一个字符
     CMP  AL,0DH
     JE   OP                              ;如果是回车，就输出结果
+    CMP  AL,'S'
+    JE   AGAIN
+    CMP  AL,'='
+    JE   AGAIN
     CMP  AL,'+'
     JE   SAVE
     CMP  AL,'-'
