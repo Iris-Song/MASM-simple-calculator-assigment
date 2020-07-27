@@ -96,16 +96,16 @@ JUDGE:
     CMP  CL,'*'
     JE   MPLY
     CMP  CL,'/'
-    JE   DVD
+    JE   DVS
     CMP  BYTE PTR[DI],'M'
     JE   P1
     JMP  JUDGE
 MPLY:
     CALL MULTIPLY
     JMP  JUDGE
-DVD:
+DVS:
     CALL DIVISION
-    JMP
+    JMP  JUDGE
 P1:
     MOV  AH,[SI]
     MOV  AL,[SI+1]
@@ -169,6 +169,22 @@ MULTIPLY PROC
     INC  DI
     RET
 MULTIPLY ENDP
+   
+DIVISION PROC
+    XOR  AX,AX
+    XOR  BX,BX
+    INC  DI
+    XCHG BH,[DI]
+    XCHG BL,[DI+1]
+    SUB  DI,2
+    XCHG AL,[DI]
+    XCHG AH,[DI-1]
+    DIV  BX
+    MOV  [DI],AL
+    MOV  [DI-1],AH
+    INC  DI
+    RET
+DIVISION ENDP
 
 OUTPUT PROC
     CALL OPERATE
