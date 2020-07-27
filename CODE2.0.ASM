@@ -22,7 +22,7 @@ MAIN PROC
     LEA  DI,EXP
     INC  DI
     DISP WCMSTR                          ;输出提示信息
-    
+    MOV  DX,0
 AGAIN: 
 
     MOV  AH,1
