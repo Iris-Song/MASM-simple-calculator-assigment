@@ -71,10 +71,12 @@ SAVE:
 MAIN ENDP
 
 SAVENUM PROC
-    SUB  AL,30H
-    MOV  [DI],AL
+    XOR  AH,AH
+    MOV  [DI],AH
     INC  DI
-    INC  CX
+    MOV  [DI],DL
+    INC  DI
+    ADD  CX,2
     RET
 SAVENUM ENDP
 
