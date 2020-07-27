@@ -1,6 +1,6 @@
 DATA SEGMENT
 WCMSTR    DB "Please input a simple expression(only contain +,-,*,\)",0AH,0DH,'$'
-OUTSTR    DB 0AH,0DH,"The result is",0AH,0DH,'$'
+OUTSTR    DB 0AH,0DH,"S=",0AH,0DH,'$'
 ERRSTR    DB 0AH,0DH,"error",0AH,0DH,'$'
 RESULT    DW ?                          
 EXP       DB  'M'
