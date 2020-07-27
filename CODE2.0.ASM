@@ -3,7 +3,7 @@ WCMSTR    DB "Please input a simple expression(only contain +,-,*,\)",0AH,0DH,'$
 OUTSTR    DB 0AH,0DH,"The result is",0AH,0DH,'$'
 ERRSTR    DB 0AH,0DH,"error",0AH,0DH,'$'
 DIVISORS  DW 10000, 1000, 100, 10, 1
-RESULT1   DB 0,0,0,0,0,'$'               ;存放整数部分五位数ASCII码
+RESULT    DW ?                          ;存放整数部分五位数ASCII码
 EXP       DB 'M'
           DW  20 DUP(0)
 DATA ENDS
@@ -27,12 +27,19 @@ AGAIN:
     MOV  AH,1
     INT  21H                             ;输入一个字符
     CMP  AL,0DH
-    JE                            ;如果是回车，就
-    
+    JE   OP                              ;如果是回车，就输出结果
+    CMP  AL,'+'
+    JE   SAVE
+    CMP  AL,'-'
+    JE   SAVE
+    CMP  AL,'*'
+    JE   SAVE 
+    CMP  AL,'/'
+    JE   SAVE
     CMP  AL,'0'
-    JL   
+    JL   ERROR
     CMP  AL,'9'
-    JG   
+    JG   ERROR
     XOR  AH,AH
     SUB  AL,30H
     XCHG AX,DX
@@ -42,6 +49,7 @@ AGAIN:
     XCHG AX,DX                           ;计算整个数字的大小并存在DX中
     JMP  AGAIN
 OP:
+    CALL SAVENUM
     CALL OUTPUT    
 EXIT:
     MOV  AX, 4C00H
@@ -51,6 +59,11 @@ ERROR:
     MOV  AH,9
     INT  21H
     JMP  EXIT
+SAVE:
+    CALL SAVENUM
+    CALL SAVESG
+    MOV  DX,0
+    JMP  AGAIN
 RET
 MAIN ENDP
 
@@ -58,37 +71,29 @@ SAVENUM PROC
     MOV  [DI],AL
     INC  DI
     INC  CX
+RET
 SAVENUM ENDP
 
+SAVESG PROC
+    MOV  [DI],AL
+    INC  DI
+    INC  CX
+RET
+SAVESG ENDP
+
+
+
 OUTPUT PROC
-    MOV  AX,DX
-    MOV  SI,OFFSET DIVISORS
-    MOV  DI,OFFSET RESULT1                    
-    MOV  CX,5  
-ONE:
-    MOV  DX,0           
-    DIV  WORD PTR [SI]                   ;除法指令的被除数是隐含操作数，此处为dx:ax，商ax,余数dx
-    ADD  AL,30H                          ;得到相应数字的ASCII码
-    MOV  BYTE PTR [DI],AL                ;存入result1中
-    INC  DI                               
-    ADD  SI,2                          
-    MOV  AX,DX                       
-    LOOP ONE
-    MOV  CX,4       
-    MOV  DI, OFFSET RESULT1
-TWO:
-    CMP  BYTE PTR [DI],'0'               ;不输出前面的0字符   
-    JNE  PRINT                           
-    INC  DI                          
-    LOOP TWO 
-PRINT:                                   ;输出整数部分
-    MOV  DX,DI                      
-    MOV  AH,9
-    INT  21H
-    MOV  DL,'.'
-    MOV  AH,2
-    INT  21H                             ;输出小数点
-    RET
+    CALL OPERATE
+    CMP  RESULT,0
+    JGE  NEXT
+    NEG  RESULT
+    MOV  DL,'-'
+    MOV  AH,2                  
+    INT  21H                        ;输出负号
+NEXT:
+    
+RET
 OUTPUT ENDP
 CODE ENDS
 END MAIN
