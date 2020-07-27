@@ -2,8 +2,7 @@ DATA SEGMENT
 WCMSTR    DB "Please input a simple expression(only contain +,-,*,\)",0AH,0DH,'$'
 OUTSTR    DB 0AH,0DH,"The result is",0AH,0DH,'$'
 ERRSTR    DB 0AH,0DH,"error",0AH,0DH,'$'
-DIVISORS  DW 10000, 1000, 100, 10, 1
-RESULT    DW ?                          ;存放整数部分五位数ASCII码
+RESULT    DW ?                          
 EXP       DB 'M'
           DW  20 DUP(0)
 DATA ENDS
@@ -86,13 +85,23 @@ SAVESG ENDP
 OUTPUT PROC
     CALL OPERATE
     CMP  RESULT,0
-    JGE  NEXT
+    JGE  L1
     NEG  RESULT
     MOV  DL,'-'
     MOV  AH,2                  
     INT  21H                        ;输出负号
-NEXT:
-    
+L1:
+    MOV  BX,1000
+    MOV  CX,4
+    XOR  DX,DX
+L2:
+    MOV  AX,RESULT
+    DIV  BX
+    MOV  RESULT,DX
+    CMP  AL,0                       ;判断最高位是否为0，是0不输出
+    JNE  L3
+    CMP  CX,1
+    JE   W3
 RET
 OUTPUT ENDP
 CODE ENDS
