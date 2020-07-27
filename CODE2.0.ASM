@@ -5,6 +5,8 @@ ERRSTR    DB 0AH,0DH,"error",0AH,0DH,'$'
 RESULT    DW ?                          
 EXP       DB 'M'
           DW  20 DUP(0)
+DIVISORS  DW 10000, 1000, 100, 10, 1
+RESULT1   DB 0,0,0,0,0,"$"               ;存放整数部分五位数ASCII码 
 DATA ENDS
 DISP MACRO STR
     LEA  DX,STR
@@ -84,24 +86,39 @@ SAVESG ENDP
 
 OUTPUT PROC
     CALL OPERATE
+    MOV  AX,RESULT
+    MOV  SI,OFFSET DIVISORS
+    MOV  DI,OFFSET RESULT1                    
+    MOV  CX,5  
     CMP  RESULT,0
-    JGE  L1
+    JGE  ONE
     NEG  RESULT
     MOV  DL,'-'
     MOV  AH,2                  
     INT  21H                        ;输出负号
-L1:
-    MOV  BX,1000
-    MOV  CX,4
-    XOR  DX,DX
-L2:
-    MOV  AX,RESULT
-    DIV  BX
-    MOV  RESULT,DX
-    CMP  AL,0                       ;判断最高位是否为0，是0不输出
-    JNE  L3
-    CMP  CX,1
-    JE   W3
+ONE:
+    MOV  DX,0           
+    DIV  WORD PTR [SI]                   ;除法指令的被除数是隐含操作数，此处为dx:ax，商ax,余数dx
+    ADD  AL,30H                          ;得到相应数字的ASCII码
+    MOV  BYTE PTR [DI],AL                ;存入result1中
+    INC  DI                               
+    ADD  SI,2                          
+    MOV  AX,DX                       
+    LOOP ONE
+    MOV  CX,4       
+    MOV  DI, OFFSET RESULT1
+TWO:
+    CMP  BYTE PTR [DI],'0'               ;不输出前面的0字符   
+    JNE  PRINT                           
+    INC  DI                          
+    LOOP TWO 
+PRINT:                                   ;输出整数部分
+    MOV  DX,DI                      
+    MOV  AH,9
+    INT  21H
+    MOV  DL,'.'
+    MOV  AH,2
+    INT  21H                             ;输出小数点
 RET
 OUTPUT ENDP
 CODE ENDS
