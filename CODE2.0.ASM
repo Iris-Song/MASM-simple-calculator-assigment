@@ -3,7 +3,7 @@ WCMSTR    DB "Please input a simple expression(only contain +,-,*,\)",0AH,0DH,'$
 OUTSTR    DB 0AH,0DH,"The result is",0AH,0DH,'$'
 ERRSTR    DB 0AH,0DH,"error",0AH,0DH,'$'
 RESULT    DW ?                          
-EXP       DB 'M'
+EXP       DB  'M'
           DW  20 DUP(0)
 DIVISORS  DW 10000, 1000, 100, 10, 1
 RESULT1   DB 0,0,0,0,0,"$"               ;存放整数部分五位数ASCII码 
@@ -69,6 +69,7 @@ RET
 MAIN ENDP
 
 SAVENUM PROC
+    SUB  AL,30H
     MOV  [DI],AL
     INC  DI
     INC  CX
@@ -82,7 +83,86 @@ SAVESG PROC
 RET
 SAVESG ENDP
 
+OPRATE PROC
+    LEA  SI,EXP
+    INC  SI
+JUDGE:
+    SUB  DI,3
+    MOV  CL,[DI]
+    CMP  CL,'*'
+    JE   MPLY
+    CMP  CL,'/'
+    JE   DVD
+    CMP  BYTE PTR[DI],'M'
+    JE   P1
+    JMP  JUDGE
+MPLY:
+    CALL MULTIPLY
+    JMP  JUDGE
+DVD:
+    CALL DIVISION
+    JMP
+P1:
+    MOV  AH,[SI]
+    MOV  AL,[SI+1]
+    MOV  RESULT,AX                ;将结果保存到AX
+P2:
+    ADD  SI,2
+    MOV  CL,[SI]
+    CMP  CL,'+'
+    JE   AD
+    CMP  CL,'-'
+    JE   SBTC
+AD:
+    CALL ADDITION
+    CMP  SI,OFFSET EXP+11
+    JB   P2
+SBTC:
+    CALL SUBTRACTION
+    CMP  SI,OFFSET EXP+11
+    JB   P2 
+RET
+OPRATE ENDP
 
+ADDITION PROC
+    XOR  AX,AX
+    XOR  BX,BX
+    MOV  AX,RESULT
+    INC  SI
+    XCHG BH,[SI]
+    XCHG BL,[SI+1]
+    ADD  AX,BX
+    MOV  RESULT,AX
+RET
+ADDITION ENDP
+
+SUBTRACTION PROC
+    XOR  AX,AX
+    XOR  BX,BX
+    MOV  AX,RESULT
+    INC  SI
+    XCHG BH,[SI]
+    XCHG BL,[SI+1]
+    SUB  AX,BX
+    MOV  RESULT,AX
+RET
+SUBTRACTION ENDP
+
+MULTIPLY PROC
+    XOR  AX,AX
+    XOR  BX,BX
+    INC  DI
+    XCHG BH,[DI]
+    XCHG BL,[DI+1]
+    SUB  DI,2
+    XCHG AL,[DI]
+    XCHG AH,[DI-1]
+    MUL  BX
+    MOV  [DI],AL
+    MOV  [DI-1],AH
+    INC  DI
+RET
+MULTIPLY ENDP
 
 OUTPUT PROC
     CALL OPERATE
@@ -95,7 +175,7 @@ OUTPUT PROC
     NEG  RESULT
     MOV  DL,'-'
     MOV  AH,2                  
-    INT  21H                        ;输出负号
+    INT  21H                             ;输出负号
 ONE:
     MOV  DX,0           
     DIV  WORD PTR [SI]                   ;除法指令的被除数是隐含操作数，此处为dx:ax，商ax,余数dx
