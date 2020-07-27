@@ -187,8 +187,7 @@ DIVISION PROC
 DIVISION ENDP
 
 OUTPUT PROC
-    CALL OPERATE
-    MOV  AX,RESULT
+    CALL OPERATE  
     MOV  SI,OFFSET DIVISORS
     MOV  DI,OFFSET RESULT1                    
     MOV  CX,5  
@@ -198,6 +197,7 @@ OUTPUT PROC
     MOV  DL,'-'
     MOV  AH,2                  
     INT  21H                             ;输出负号
+    MOV  AX,RESULT
 ONE:
     MOV  DX,0           
     DIV  WORD PTR [SI]                   ;除法指令的被除数是隐含操作数，此处为dx:ax，商ax,余数dx
