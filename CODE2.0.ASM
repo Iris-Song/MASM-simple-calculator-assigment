@@ -55,6 +55,7 @@ AGAIN:
     JMP  AGAIN
 OP:
     CALL SAVENUM
+    CALL OPERATE  
     CALL OUTPUT    
 EXIT:
     MOV  AX, 4C00H
@@ -214,7 +215,7 @@ EDD:
 DIVISION ENDP
 
 OUTPUT PROC
-    CALL OPERATE  
+    CALL SORT
     MOV  SI,OFFSET DIVISORS
     MOV  DI,OFFSET RESULT1                    
     MOV  CX,5  
@@ -248,7 +249,15 @@ PRINT:                                   ;输出整数部分
     MOV  DL,'.'
     MOV  AH,2
     INT  21H                             ;输出小数点
+    MOV  DX,RESULTP
+    ADD  DL,30H
+    MOV  AH,2
+    INT  21H                             ;输出一位小数
     RET
 OUTPUT ENDP
+
+SORT PROC
+SORT ENDP
+
 CODE ENDS
 END MAIN
