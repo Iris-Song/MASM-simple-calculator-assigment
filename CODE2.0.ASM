@@ -192,12 +192,14 @@ DIVISION PROC
     MOV  CX,100
     MUL  CX
     DIV  BX
+AGD:
     SUB  DI,3
-    CMP  [DI],'+'
+    MOV  CL,[DI]
+    CMP  CL,'+'
     JE   EDD
-    CMP  [DI],'-'
+    CMP  CL,'-'
     JE   NGD
-    CMP  [DI],'*'
+    CMP  CL,'*'
     JE   MLD
     CMP  BYTE PTR[DI],'M'
     JE   EDD
@@ -205,7 +207,10 @@ NGD:
     NEG  AX
     JMP  EDD
 MLD:
-    MUL  [DI-1]
+    MOV  CL,[DI-1]
+    MOV  CH,[DI-2]
+    MUL  CX
+    JMP   AGD
 EDD:
     ADD  RESULTP,AX
     POP  DI
@@ -265,7 +270,8 @@ SORT PROC                                ;范围内小数部分一定为正
     CMP  RESULT,0                        ;检查整数部分是否为负，为负，则用100减去小数部分
     JGE  FFR
     SUB  RESULT,1
-    MOV  AX,100-RESULTP
+    SUB  CX,RESULTP
+    MOV  AX,CX
     MOV  RESULTP,AX
 FFR:
     MOV  AX,RESULTP
