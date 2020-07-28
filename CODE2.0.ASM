@@ -256,7 +256,27 @@ PRINT:                                   ;输出整数部分
     RET
 OUTPUT ENDP
 
-SORT PROC
+SORT PROC                                ;范围内小数部分一定为正
+    MOV  AX,RESULTP
+    MOV  CL,100
+    DIV  CL
+    ADD  RESULT,AX
+    MOV  RESULTP,DX                      ;使小数部分为小于100的有符号数
+    CMP  RESULT,0                        ;检查整数部分是否为负，为负，则用100减去小数部分
+    JGE  FFR
+    SUB  RESULT,1
+    MOV  AX,100-RESULTP
+    MOV  RESULTP,AX
+FFR:
+    MOV  AX,RESULTP
+    MOV  CX,10
+    DIV  CX
+    CMP  DX,5                            ;四舍五入
+    JL   EDS
+    INC  AX
+EDS:
+    MOV  AX,RESULTP
+    RET
 SORT ENDP
 
 CODE ENDS
