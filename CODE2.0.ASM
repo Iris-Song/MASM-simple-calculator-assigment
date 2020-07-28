@@ -25,7 +25,6 @@ MAIN PROC
     DISP WCMSTR                          ;输出提示信息
     MOV  DX,0
 AGAIN: 
-
     MOV  AH,1
     INT  21H                             ;输入一个字符
     CMP  AL,0DH
@@ -85,7 +84,7 @@ SAVESG PROC
     MOV  [DI],AL
     INC  DI
     INC  CX
-RET
+    RET
 SAVESG ENDP
 
 OPERATE PROC
