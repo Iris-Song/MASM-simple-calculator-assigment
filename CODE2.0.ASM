@@ -1,21 +1,25 @@
 DATA SEGMENT
 WCMSTR    DB "Please input a simple expression(only contain +,-,*,\)",0AH,0DH,'$'
-OUTSTR    DB 0AH,0DH,"S=",'$'
+OUTSTR    DB "S=",'$'
 ERRSTR    DB 0AH,0DH,"error",0AH,0DH,'$'
-RESULT    DW ?                          
-EXP       DB  'M'
-          DW  20 DUP(0)
+EXP       DB 'M'
+          DW 20 DUP(0)
 DIVISORS  DW 10000, 1000, 100, 10, 1
 RESULT1   DB 0,0,0,0,0,"$"               ;存放整数部分五位数ASCII码 
-RESULTP   DW 0
+RESULT    DW 0                           ;整数部分
+RESULTP   DW 0                           ;小数部分
+SIGNAL    DW 0                           ;0为正,1为负                         
 DATA ENDS
+
 DISP MACRO STR
     LEA  DX,STR
     MOV  AH,9
     INT  21H
 ENDM
+
 CODE SEGMENT
 ASSUME CS:CODE, DS:DATA
+
 MAIN PROC
     MOV  AX, DATA
     MOV  DS, AX  
@@ -55,7 +59,9 @@ AGAIN:
     JMP  AGAIN
 OP:
     CALL SAVENUM
-    CALL OPERATE  
+    CALL OPERATE 
+    DISP  OUTSTR 
+    MOV  DX,0
     CALL OUTPUT    
 EXIT:
     MOV  AX, 4C00H
@@ -110,7 +116,7 @@ DVS:
 P1:
     MOV  AH,[SI]
     MOV  AL,[SI+1]
-    MOV  RESULT,AX                ;将结果保存到AX
+    MOV  RESULT,AX                       ;将结果保存到AX
 P2:
     ADD  SI,2
     MOV  CL,[SI]
@@ -180,18 +186,19 @@ DIVISION PROC
     SUB  DI,2
     XCHG AL,[DI]
     XCHG AH,[DI-1]
-    DIV  BX
+    IDIV  BL
     MOV  [DI],AL
+    XCHG AL,AH
+    XOR  AH,AH
     MOV  [DI-1],AH
-    INC  DI
-    
+    INC  DI   
     PUSH AX
     PUSH CX
     PUSH DI
-    MOV  AX,DX
     MOV  CX,100
-    MUL  CX
-    DIV  BX
+    MUL  CL
+    IDIV   BL
+    XOR  AH,AH
 AGD:
     SUB  DI,3
     MOV  CL,[DI]
@@ -203,7 +210,7 @@ AGD:
     JE   MLD
     CMP  BYTE PTR[DI],'M'
     JE   EDD
-NGD:
+NGD:   
     NEG  AX
     JMP  EDD
 MLD:
@@ -211,25 +218,35 @@ MLD:
     MOV  CH,[DI-2]
     MUL  CX
     JMP   AGD
-EDD:
+EDD:    
     ADD  RESULTP,AX
     POP  DI
     POP  CX
-    POP  AX
+    POP  AX       
     RET
 DIVISION ENDP
 
 OUTPUT PROC
+    CMP  RESULTP,0
+    JE   NT
     CALL SORT
+NT:
     MOV  SI,OFFSET DIVISORS
     MOV  DI,OFFSET RESULT1                    
     MOV  CX,5  
     CMP  RESULT,0
-    JGE  ONE
+    JG   ON
+    JE   JSG
+    JL   NGO
+JSG:
+    CMP  SIGNAL,0
+    JE   ON
+NGO:
     NEG  RESULT
     MOV  DL,'-'
     MOV  AH,2                  
     INT  21H                             ;输出负号
+ON:
     MOV  AX,RESULT
 ONE:
     MOV  DX,0           
@@ -253,36 +270,63 @@ PRINT:                                   ;输出整数部分
     INT  21H
     MOV  DL,'.'
     MOV  AH,2
-    INT  21H                             ;输出小数点
-    MOV  DX,RESULTP
+    INT  21H
+    MOV  DL,BYTE PTR RESULTP             ;输出小数点
     ADD  DL,30H
     MOV  AH,2
-    INT  21H                             ;输出一位小数
+    INT  21H
+
     RET
 OUTPUT ENDP
 
-SORT PROC                                ;范围内小数部分一定为正
+SORT PROC                                ;小数部分为正
+    XOR  DX,DX 
     MOV  AX,RESULTP
+    CMP  RESULTP,0
+    JL   S1
     MOV  CX,100
-    DIV  CX
+    DIV  CL
+    XCHG AH,DL
     ADD  RESULT,AX
+    XOR  DH,DH
     MOV  RESULTP,DX                      ;使小数部分为小于100的有符号数
     CMP  RESULT,0                        ;检查整数部分是否为负，为负，则用100减去小数部分
     JGE  FFR
+    MOV  SIGNAL,1
+    NEG  RESULT
     SUB  RESULT,1
+    NEG  RESULT
     SUB  CX,RESULTP
     MOV  AX,CX
     MOV  RESULTP,AX
 FFR:
     MOV  AX,RESULTP
     MOV  CX,10
-    DIV  CX
-    CMP  DX,5                            ;四舍五入
+    DIV  CL
+    CMP  AH,5                            ;四舍五入
     JL   EDS
-    INC  AX
-EDS:
-    MOV  AX,RESULTP
+    INC  AL
+EDS: 
+    XOR  AH,AH
+    MOV  RESULTP,AX
     RET
+S1:                                      ;小数部分为负
+    NEG  AX
+    MOV  CX,100
+    DIV  CL
+    XCHG AH,DL
+    SUB  RESULT,AX
+    XOR  DH,DH
+    MOV  RESULTP,DX                      ;使小数部分为小于100的有符号数,小数部分仍为负数
+    MOV  SIGNAL,1
+    CMP  RESULT,0                        ;检查整数部分是否为正，为正，则用100减去小数部分
+    JLE  FFR
+    MOV  SIGNAL,0
+    SUB  RESULT,1
+    SUB  CX,RESULTP
+    MOV  AX,CX
+    MOV  RESULTP,AX
+    JMP  FFR 
 SORT ENDP
 
 CODE ENDS
