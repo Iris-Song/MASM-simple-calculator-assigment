@@ -263,8 +263,8 @@ OUTPUT ENDP
 
 SORT PROC                                ;范围内小数部分一定为正
     MOV  AX,RESULTP
-    MOV  CL,100
-    DIV  CL
+    MOV  CX,100
+    DIV  CX
     ADD  RESULT,AX
     MOV  RESULTP,DX                      ;使小数部分为小于100的有符号数
     CMP  RESULT,0                        ;检查整数部分是否为负，为负，则用100减去小数部分
