@@ -7,6 +7,7 @@ EXP       DB  'M'
           DW  20 DUP(0)
 DIVISORS  DW 10000, 1000, 100, 10, 1
 RESULT1   DB 0,0,0,0,0,"$"               ;存放整数部分五位数ASCII码 
+RESULTP   DW 0
 DATA ENDS
 DISP MACRO STR
     LEA  DX,STR
@@ -18,7 +19,7 @@ ASSUME CS:CODE, DS:DATA
 MAIN PROC
     MOV  AX, DATA
     MOV  DS, AX  
-
+    MOV  RESULTP,0
     LEA  DI,EXP
     INC  DI
     DISP WCMSTR                          ;输出提示信息
@@ -183,6 +184,33 @@ DIVISION PROC
     MOV  [DI],AL
     MOV  [DI-1],AH
     INC  DI
+    
+    PUSH AX
+    PUSH CX
+    PUSH DI
+    MOV  AX,DX
+    MOV  CX,100
+    MUL  CX
+    DIV  BX
+    SUB  DI,3
+    CMP  [DI],'+'
+    JE   EDD
+    CMP  [DI],'-'
+    JE   NGD
+    CMP  [DI],'*'
+    JE   MLD
+    CMP  BYTE PTR[DI],'M'
+    JE   EDD
+NGD:
+    NEG  AX
+    JMP  EDD
+MLD:
+    MUL  [DI-1]
+EDD:
+    ADD  RESULTP,AX
+    POP  DI
+    POP  CX
+    POP  AX
     RET
 DIVISION ENDP
 
